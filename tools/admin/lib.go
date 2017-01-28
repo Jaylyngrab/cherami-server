@@ -187,13 +187,14 @@ type topKExtJSONOUtputFields struct {
 }
 
 type extentAllJSONOutputFields struct {
-	DestinationUUID string                           `json:"destination_uuid"`
-	ExtentUUID      string                           `json:"extent_uuid"`
-	Status          shared.ExtentStatus              `json:"status"`
-	InputHost       string                           `json:"inputhost,omitempty"`
-	StoreHosts      []string                         `json:"storehosts,omitempty"`
-	CreatedTime     time.Time                        `json:"createdTime,omitempty"`
-	ReplicaExtents  []*replicaExtentJSONOutputFields `json:"replica_extents"`
+	DestinationUUID   string                           `json:"destination_uuid"`
+	ExtentUUID        string                           `json:"extent_uuid"`
+	Status            shared.ExtentStatus              `json:"status"`
+	InputHost         string                           `json:"inputhost,omitempty"`
+	StoreHosts        []string                         `json:"storehosts,omitempty"`
+	CreatedTime       time.Time                        `json:"created_time,omitempty"`
+	ReplicaExtents    []*replicaExtentJSONOutputFields `json:"replica_extents"`
+	StatusUpdatedTime time.Time                        `json:"status_updated_time"`
 }
 
 type replicaExtentJSONOutputFields struct {
@@ -382,13 +383,14 @@ func ReadExtent(c *cli.Context) {
 		}
 	}
 	output := &extentAllJSONOutputFields{
-		DestinationUUID: extent.GetDestinationUUID(),
-		ExtentUUID:      uuidStr,
-		Status:          extentStats.GetStatus(),
-		CreatedTime:     time.Unix(0, *(extentStats.CreatedTimeMillis)*1000000),
-		InputHost:       inputHostAddr,
-		StoreHosts:      storeHosts,
-		ReplicaExtents:  replicaExtents,
+		DestinationUUID:   extent.GetDestinationUUID(),
+		ExtentUUID:        uuidStr,
+		Status:            extentStats.GetStatus(),
+		CreatedTime:       time.Unix(0, *(extentStats.CreatedTimeMillis)*1000000),
+		StatusUpdatedTime: time.Unix(0, *(extentStats.StatusUpdatedTimeMillis)*1000000),
+		InputHost:         inputHostAddr,
+		StoreHosts:        storeHosts,
+		ReplicaExtents:    replicaExtents,
 	}
 
 	outputStr, _ := json.Marshal(output)
@@ -551,11 +553,12 @@ func ReadDestQueue(c *cli.Context) {
 				}
 			}
 			output := &extentAllJSONOutputFields{
-				DestinationUUID: extent.GetDestinationUUID(),
-				ExtentUUID:      extent.GetExtentUUID(),
-				Status:          stats.GetStatus(),
-				CreatedTime:     time.Unix(0, *(stats.CreatedTimeMillis)*1000000),
-				ReplicaExtents:  replicaExtents,
+				DestinationUUID:   extent.GetDestinationUUID(),
+				ExtentUUID:        extent.GetExtentUUID(),
+				Status:            stats.GetStatus(),
+				CreatedTime:       time.Unix(0, *(stats.CreatedTimeMillis)*1000000),
+				StatusUpdatedTime: time.Unix(0, *(stats.StatusUpdatedTimeMillis)*1000000),
+				ReplicaExtents:    replicaExtents,
 			}
 
 			outputStr, _ := json.Marshal(output)
@@ -688,12 +691,13 @@ func ListAllDestinations(c *cli.Context) {
 }
 
 type extentJSONOutputFields struct {
-	DestinationUUID *string             `json:"destination_uuid"`
-	ExtentUUID      string              `json:"extent_uuid"`
-	Status          shared.ExtentStatus `json:"status"`
-	InputHost       string              `json:"inputhost"`
-	StoreHosts      []string            `json:"storehosts"`
-	CreatedTime     time.Time           `json:"createdTime,omitempty"`
+	DestinationUUID   *string             `json:"destination_uuid"`
+	ExtentUUID        string              `json:"extent_uuid"`
+	Status            shared.ExtentStatus `json:"status"`
+	InputHost         string              `json:"inputhost"`
+	StoreHosts        []string            `json:"storehosts"`
+	CreatedTime       time.Time           `json:"createdTime,omitempty"`
+	StatusUpdatedTime time.Time           `json:"status_updated_time"`
 }
 
 type cgExtentJSONOutputFields struct {
@@ -764,11 +768,15 @@ func ListExtents(c *cli.Context) {
 			}
 
 			output := &extentJSONOutputFields{
-				DestinationUUID: desc.DestinationUUID,
-				ExtentUUID:      extentUUID,
-				Status:          stats.GetStatus(),
-				InputHost:       inputHostAddr,
-				StoreHosts:      storeHosts}
+				DestinationUUID:   desc.DestinationUUID,
+				ExtentUUID:        extentUUID,
+				Status:            stats.GetStatus(),
+				InputHost:         inputHostAddr,
+				StoreHosts:        storeHosts,
+				CreatedTime:       time.Unix(0, *(stats.CreatedTimeMillis)*1000000),
+				StatusUpdatedTime: time.Unix(0, *(stats.StatusUpdatedTimeMillis)*1000000),
+			}
+
 			outputStr, _ := json.Marshal(output)
 			fmt.Fprintln(os.Stdout, string(outputStr))
 		}
